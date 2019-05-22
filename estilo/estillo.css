@@ -1,0 +1,48 @@
+ div.tudo{
+    border: 5px solid rgb(219, 216, 212);
+    width: 76%;
+    display: flex;
+} 
+h1{
+    margin-left: 127px;
+}
+div.produtos{
+    display: flex;
+}
+div.nome{
+    margin-left: 30px;
+}
+div.nome p{
+    border-top: 1px solid;
+    width: 150%;
+    text-align: center;
+}
+form{
+    background-color: rgb(248, 243, 236);
+    margin-left: 100px;
+    width: 41%;
+    height: 380px;
+}
+input.nome{
+    width: 300px;  
+}
+select.select{
+    width: 300px;   
+}
+input.descricao{
+    width: 300px; 
+    height: 40px;  
+}
+input.qtd{
+    width: 300px;   
+}
+input.preco{
+    width: 300px;
+}
+button.buttom{
+    background-color: blue;
+    width: 70px;
+    height: 30px;
+    margin-top: 5px;
+    margin-left: 250px;
+}
