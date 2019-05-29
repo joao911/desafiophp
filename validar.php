@@ -1,5 +1,6 @@
 <?php
 
+include("conexao.php");
 $nome  = $_POST['nome'];
 $select = $_POST['select'];
 $descricao = $_POST['descricao'];
@@ -19,6 +20,7 @@ $extensaoArquivo = $_FILES['foto']['type'];
 // a onde eu quero salvar
 $localSave = "save/$nomeArquivo";
 
+
 if($_FILES['foto']['error'] !=  UPLOAD_ERR_OK){
 echo "Deu um erro no arquivo";
 }
@@ -28,6 +30,7 @@ if(array_search($extensaoArquivo, $extensoesAceitas)=== false){
 }
 //Salvando de fato o arquivo
 move_uploaded_file($aquivoTmp,$localSave);
+$_POST['foto'] = $localSave;
 
 
 function validarNome($nome){
@@ -45,22 +48,51 @@ function validarQtd($qtd){
 function validarPreco($preco){
     return strlen($preco)>0;
 }
-function salvarCompras($arrayCompras){
-    if(!file_exists('compras.json')){
-        $compras ["listasCompras"] = [$arrayCompras];
-        $jasonCompras = json_encode($compras);
-        file_put_contents('compras.json',$jasonCompras);
-    }else{
-        $jasonCompras = file_get_contents('compras.json');
-        $listraCompras =json_decode($jasonCompras,TRUE);
-        $listraCompras["listasCompras"][] = $arrayCompras;
-        $jasonCompras = json_encode($listraCompras);
-        file_put_contents('compras.json',$jasonCompras);
+// function salvarCompras($arrayCompras){
+//     //se compras não existir
+//     if(!file_exists('compras.json')){
+//         //estou crinado um array $compra e estou add uma nova compra
+//         $compras ["listasCompras"] = [$arrayCompras];
+//         //estou  transformando o arraay $jasonCompras em um json
+//         $jasonCompras = json_encode($compras);
+//         // estou crinado o arquivo e add o conteudo
+//         file_put_contents('compras.json',$jasonCompras);
+//     }else{
+//         //primeiro pego o conteudo que ja existe na váriável $jasonCompras
+//         $jasonCompras = file_get_contents('compras.json');
+//         //transformo em um array
+//         $listraCompras =json_decode($jasonCompras,TRUE);
+//         // adiciono mais uma compra
+//         $listraCompras["listasCompras"][] = $arrayCompras;
+//         // transformo novamente em arquivo json
+//         $jasonCompras = json_encode($listraCompras);
+//         // ele está atualizando o conteudo
+//         file_put_contents('compras.json',$jasonCompras);
         
-    };
-}
-function validarDados($nome, $select, $descricao, $qtd, $preco){
-    global $erros;
+//     };
+// }
+function salvarNoBanco($arrayPost, $conexao){
+    $data_atual = date("y-m-d H:i:s");
+    $query = $conexao->prepare("INSERT INTO produtos (nome, descricao,categoria_id, quantidade, preco, img,data_alteracao) values (?,?,?,?,?,?,?)");
+    try{
+        $result = $query->execute([
+            $arrayPost['nome'],
+            $arrayPost['descricao'],
+            $arrayPost['select'],
+            $arrayPost['qtd'],
+            $arrayPost['preco'],
+            $arrayPost['foto'],
+            $data_atual
+        ]);
+        echo "<script>alert('produto cadastrado com sucesso')</script>";
+    }catch(PDOException $e){
+        echo"<script>alert('não vai ta dando, tente daqui uma semana')</script>";
+        echo $e->getMessage();
+    }
+};
+
+function validarDados($nome, $select, $descricao, $qtd, $preco, $localSave){
+    global $erros, $con;
     if(!validarNome($nome)){
       array_push($erros,"Preencha seu nome corretamente");  
     }if (!validarSelect($select)){
@@ -73,10 +105,13 @@ function validarDados($nome, $select, $descricao, $qtd, $preco){
         array_push($erros," O valor minimo é R$52");
     }
     if (count($erros)==0){
-        salvarCompras($_POST);
+        $compra = $_POST;
+        $compra['foto'] = $localSave;
+        salvarNoBanco($_POST, $con);
     }
 }
-validarDados($nome,$select, $descricao, $qtd, $preco);
+validarDados($nome,$select, $descricao, $qtd, $preco, $localSave);
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
